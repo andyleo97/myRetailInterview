@@ -19,7 +19,9 @@ When installed, run on Mongo Server on default port 27017.
 from command line run:
 
 mongo
+
 use product_db
+
 db.getCollection('ProductPrice').save({ "productId": 13860428, "price": 5.99, "currencyCode": "USD" })
 
 - Git Clone this repo
