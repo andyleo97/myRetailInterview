@@ -6,6 +6,7 @@ import com.andyleo.myRetail.service.ProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -57,5 +58,10 @@ public class ProductController {
     @ExceptionHandler(JsonProcessingException.class)
     public ResponseEntity<?> handleJsonError(JsonProcessingException ex){
         return new ResponseEntity<>(ex.getLocalizedMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleNoBodyError(HttpMessageNotReadableException ex){
+        return new ResponseEntity<>("Error with body of request", HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,6 +25,9 @@ public class ProductService {
         Product product = new Product();
         product.setPriceInfo(productRepo.findPriceInfoByProductId(productId));
         product.setTitle(getProductTitle(productId));
+        if(product.getPriceInfo() == null){
+            return null;
+        }
         return product;
     }
 
@@ -36,13 +40,13 @@ public class ProductService {
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(getPath(productId)).build();
         response = restfulTemplate.getForEntity(uriComponents.encode().toUri(), String.class);
         responseBody = response.getBody();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode productRootNode = mapper.readTree(responseBody);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(responseBody);
 
-        if (productRootNode != null) {
-            productTitle = productRootNode.get("product").get("item").get("product_description").get("title").asText();
+        if (root != null) {
+            productTitle = root.get("product").get("item").get("product_description").get("title").asText();
         }
-        
+
         return productTitle;
     }
 
@@ -54,9 +58,11 @@ public class ProductService {
     }
 
     public Product savePriceInfo(Product product) throws Exception{
-        PriceInfo updated = productRepo.save(product.getPriceInfo());
-        product.setPriceInfo(updated);
-        product.setTitle(getProductTitle(product.getPriceInfo().getProductId()));
+        if(product != null) {
+            PriceInfo updated = productRepo.save(product.getPriceInfo());
+            product.setPriceInfo(updated);
+            product.setTitle(getProductTitle(product.getPriceInfo().getProductId()));
+        }
         return product;
     }
 }
